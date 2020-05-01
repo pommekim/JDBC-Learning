@@ -23,8 +23,8 @@ public class EmpDAO {
 	}
 	
 	private Connection getConnection() { //커넥션풀에서 커넥션 찾아오는 메서드 만들기
-		DataSource ds = null;
-		Connection con = null;
+		DataSource ds = null; //데이터 소스 객체 생성
+		Connection con = null; //사전에 생성해둔 데이터풀 객체 생성
 		try {
 			Context ctx = new InitialContext(); //context는 프로젝트를 객체화 시켜놓은 것
 			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/Oracle"); //context를 통해 저 주소값에 데이터를 찾아와라?
