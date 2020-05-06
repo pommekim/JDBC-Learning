@@ -1,6 +1,8 @@
 package lab.web.servlet;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import javax.servlet.ServletException;
@@ -50,6 +52,23 @@ public class EmpServlet extends HttpServlet {
 			ArrayList<EmpVO> list = dao.selectEmployeeListByManId(manId);
 			request.setAttribute("list", list);
 			url = "/EmpList.jsp";
+		} else if(action.equals("insert")) {
+			request.setAttribute("jobList", dao.selectJobs()); //arraylist 결과값을 보내주겠다!
+			request.setAttribute("manList", dao.selectManagers());
+			request.setAttribute("deptList", dao.selectDepartments());
+			request.setAttribute("message", "입력");
+			request.setAttribute("action", action); //입력일 때 실행이 되게끔!
+			url = "/EmpInsert.jsp";
+		} else if(action.equals("update")) {
+			int empId = Integer.parseInt(request.getParameter("empId")); //들어올 사원번호 받아주기
+			EmpVO emp = dao.selectEmployee(empId);
+			request.setAttribute("emp", emp);
+			request.setAttribute("jobList", dao.selectJobs()); //위에 list에 있는 것 전부 함께 보내주기
+			request.setAttribute("manList", dao.selectManagers());
+			request.setAttribute("deptList", dao.selectDepartments());
+			request.setAttribute("message", "수정");
+			request.setAttribute("action", action); //수정일 때 실행이 되게끔!
+			url = "/EmpInsert.jsp";
 		}
 		request.getRequestDispatcher(url).forward(request, response);
 	}
@@ -57,6 +76,49 @@ public class EmpServlet extends HttpServlet {
 	
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		int empId = Integer.parseInt(request.getParameter("empId"));
+		String firstName = request.getParameter("firstName");
+		String lastName = request.getParameter("lastName");
+		String email = request.getParameter("email");
+		String phoneNumber = request.getParameter("phoneNumber");
+		java.sql.Date hireDate = null; //sql의 date이기 때문에 한번 더 재정의해줘야 함
+		try {
+			String sdate = request.getParameter("hireDate");
+			SimpleDateFormat tool = new SimpleDateFormat("yyyy-MM-dd"); //1. 형식 바꾸기
+			java.util.Date date = tool.parse(sdate); //2. simple의 parse메서드를 이용해서 자바 날짜로 바꾸기 (여기서 exception이 걸릴 수 있음!!!)
+			hireDate = new java.sql.Date(date.getTime()); //3. sql date로 다시 한번 바꾸기 (자바날짜를 숫자로 바꿔서 sql로 넣어주는 것)
+		} catch(ParseException e) {
+			e.printStackTrace();
+		}
+		String jobId = request.getParameter("jobId");
+		double salary = Double.parseDouble(request.getParameter("salary")); //클래스형 Double을 기본형 double로 바꿔주기
+		double commissionPct = Double.parseDouble(request.getParameter("commissionPct"));
+		int managerId = Integer.parseInt(request.getParameter("managerId"));
+		int departmentId = Integer.parseInt(request.getParameter("departmentId"));
+		
+		EmpVO emp = new EmpVO();
+		emp.setEmployeeId(empId);
+		emp.setFirstName(firstName);
+		emp.setLastName(lastName);
+		emp.setEmail(email);
+		emp.setPhoneNumber(phoneNumber);
+		emp.setHireDate(hireDate);
+		emp.setJobId(jobId);
+		emp.setSalary(salary);
+		emp.setCommissionPct(commissionPct);
+		emp.setManagerId(managerId);
+		emp.setDepartmentId(departmentId);
+		dao.insertEmployee(emp);
+		
+		response.sendRedirect("/JDBC/Emp.do?action=list"); //주소값 주의
+		
+		
+		
+		
+		
+		
+		
 		
 	}
 

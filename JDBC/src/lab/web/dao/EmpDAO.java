@@ -10,8 +10,11 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import lab.web.vo.DeptVO;
 import lab.web.vo.EmpDetailVO;
 import lab.web.vo.EmpVO;
+import lab.web.vo.JobVO;
+import oracle.jdbc.proxy.annotation.GetDelegate;
 
 public class EmpDAO {
 	
@@ -205,19 +208,116 @@ public class EmpDAO {
 	
 	//---------------------------------------------------------------------------------------------------
 	
+	//0506 insert 페이지 만들기
+	public ArrayList<JobVO> selectJobs() { //매개변수의 유무는 외부에서 값이 들어오느냐 아니냐의 차이
+		Connection con = null;
+		ArrayList<JobVO> list = new ArrayList<>();
+		try {
+			con = getConnection();
+			String sql = "select job_id, job_title from jobs";
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery(); //셋팅이 필요없음
+			while(rs.next()) {
+				JobVO job = new JobVO();
+				job.setJobId(rs.getString("job_id"));
+				job.setJobTitle(rs.getString("job_title"));
+				list.add(job);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("selectJobs메서드 에러발생-콘솔확인");
+		} finally {
+			closeConnection(con);
+		}
+		return list;
+	}
 	
 	
 	
+	public ArrayList<EmpVO> selectManagers() {
+		Connection con = null;
+		ArrayList<EmpVO> list = new ArrayList<>();
+		try {
+			con = getConnection();
+			String sql = "select employee_id, first_name||' '||last_name as manager_name "
+					+ "from employees "
+					+ "where employee_id in (select distinct manager_id from employees)"; //매니저인 사람만 가지고 오기
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()) {
+				EmpVO emp = new EmpVO();
+				emp.setEmployeeId(rs.getInt("employee_id"));
+				emp.setFirstName(rs.getString("manager_name")); //이름을 빼올때 firstname에서 빼와야 함
+				list.add(emp);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("selectManagers메서드 에러발생-콘솔확인");
+		} finally {
+			closeConnection(con);
+		}
+		return list;
+	}
 	
 	
 	
+	public ArrayList<DeptVO> selectDepartments() {
+		Connection con = null;
+		ArrayList<DeptVO> list = new ArrayList<>();
+		try {
+			con = getConnection();
+			String sql = "select department_id, department_name from departments";
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()) {
+				DeptVO dept = new DeptVO();
+				dept.setDepartmentId(rs.getInt("department_id"));
+				dept.setDepartmentName(rs.getString("department_name"));
+				list.add(dept);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("selectDepartments메서드 에러발생-콘솔확인");
+		} finally {
+			closeConnection(con);
+		}
+		return list;
+	}
 	
 	
 	
-	
-	
-	
-	
+	public void insertEmployee(EmpVO emp) { //매개변수를 묶어서 던져줌
+		Connection con = null;
+		try {
+			con = getConnection();
+			String sql = "insert into employees values(?,?,?,?,?,?,?,?,?,?,?)";
+			PreparedStatement stmt = con.prepareStatement(sql);
+			stmt.setInt(1, emp.getEmployeeId());
+			stmt.setString(2, emp.getFirstName());
+			stmt.setString(3, emp.getLastName());
+			stmt.setString(4, emp.getEmail());
+			stmt.setString(5, emp.getPhoneNumber());
+			stmt.setDate(6, emp.getHireDate());
+			stmt.setString(7, emp.getJobId());
+			stmt.setDouble(8, emp.getSalary());
+			stmt.setDouble(9, emp.getCommissionPct());
+			stmt.setInt(10, emp.getManagerId());
+			stmt.setInt(11, emp.getDepartmentId());
+			if(stmt.executeUpdate()==0) { //결과값을 int로 돌려줌!!!
+				throw new RuntimeException("데이터 입력 안 됨"); //값이 중복되는 경우, 표현할 수 있는 값을 넘어서는 경우
+			}
+		} catch(SQLException e) {
+			if(e.getMessage().contains("무결성")) {
+				throw new RuntimeException("데이터가 중복됩니다.");
+			} else {
+				e.printStackTrace();
+				throw new RuntimeException("insertEmployee메서드 예외발생-콘솔확인");
+			}
+		} finally {
+			closeConnection(con);
+		}
+		
+	}
 	
 	
 	

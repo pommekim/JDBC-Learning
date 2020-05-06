@@ -45,5 +45,8 @@
 <td>부서</td><td><%=emp.getDepartmentName()%>(<%=emp.getDepartmentId() %>)</td>
 </tr>
 </table>
+
+<a href="/JDBC/Emp.do?action=update&empId=<%=emp.getEmployeeId()%>">정보 수정</a> <!-- 수정이나 삭제는 특정 데이터를 찍은 상태여야 함!!! -->
+
 </body>
 </html>
