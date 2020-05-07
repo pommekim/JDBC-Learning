@@ -207,8 +207,8 @@ public class EmpDAO {
 	}
 	
 	//---------------------------------------------------------------------------------------------------
+	//0506 입력 메서드 작성 (insert)
 	
-	//0506 insert 페이지 만들기
 	public ArrayList<JobVO> selectJobs() { //매개변수의 유무는 외부에서 값이 들어오느냐 아니냐의 차이
 		Connection con = null;
 		ArrayList<JobVO> list = new ArrayList<>();
@@ -318,6 +318,67 @@ public class EmpDAO {
 		}
 		
 	}
+	
+	//------------------------------------------------------------------------------------------
+	//0507 수정 메서드 작성 (update)
+	
+	public void updateEmployee(EmpVO emp) { //insert와 달라질 것은 쿼리문 밖에 없음!
+		Connection con = null;
+		try {
+			con = getConnection();
+			con.setAutoCommit(false); //자동 커밋을 해제시켜놓음 (트랜젝션 상태)
+			String sql1 = "delete from job_history where employee_id=?"; //수정은 10번밖에 안되기 때문에 job history를 날리고 시작해야 함
+			PreparedStatement stmt = con.prepareStatement(sql1);
+			stmt.setInt(1, emp.getEmployeeId());
+			stmt.executeUpdate(); //최초 수정은 확인해줄 필요가 없기 때문에 실행만 하고 끝
+			
+			String sql2 = "update employees set first_name=?, last_name=?, email=?, phone_number=?, "
+					+ "hire_date=?, job_id=?, salary=?, commission_pct=?, manager_id=?, department_id=? "
+					+ "where employee_id=?"; //순서에 주의하기!!!
+					//primary key는 절대 못바꾸기 때문에 10개 값을 바꿔줌
+					//사실 email은 유니크기 때문에 바꾸면 안됨 (무결성 제약조건)
+			stmt = con.prepareStatement(sql2); //stmt 재활용 (한 메서드에 여러가지 쿼리가 들어갈 때는 이렇게 써주면 됨)
+			stmt.setString(1, emp.getFirstName());
+			stmt.setString(2, emp.getLastName());
+			stmt.setString(3, emp.getEmail());
+			stmt.setString(4, emp.getPhoneNumber());
+			stmt.setDate(5, emp.getHireDate());
+			stmt.setString(6, emp.getJobId());
+			stmt.setDouble(7, emp.getSalary());
+			stmt.setDouble(8, emp.getCommissionPct());
+			stmt.setInt(9, emp.getManagerId());
+			stmt.setInt(10, emp.getDepartmentId());
+			stmt.setInt(11, emp.getEmployeeId());
+			//실행했을 때 0인지 아닌지 확인해보아야 함!!!
+			if(stmt.executeUpdate()==0) { //실행결과가 0이라면 쿼리는 맞는데 없는 사원 번호를 집어넣었다거나 조건식이 틀렸다는 뜻임!
+				con.rollback();
+				throw new RuntimeException("데이터가 수정되지 않았습니다.");
+			}
+			con.commit(); //해제했던 커밋을 다시 원상태로 (모든 것은 커넥션이 처리)
+			
+		} catch(SQLException e) {
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				
+			}
+			e.printStackTrace();
+			throw new RuntimeException("updateEmployee메서드 예외발생-콘솔확인");
+			
+		} finally {
+			closeConnection(con);
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
