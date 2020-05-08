@@ -14,9 +14,9 @@
 &nbsp;&nbsp;
 3. <a href="/JDBC/Emp.do?action=insert">사원 정보 입력</a>
 <br>
-4. <a href="/JDBC/MemberInsert.jsp">관리자 회원 가입</a>
+4. <a href="/JDBC/Member.do?action=insert">관리자 회원 가입</a>
 &nbsp;&nbsp;
-5. <a href="/JDBC/MemberSearch.jsp">관리자 정보 조회</a>
+5. <a href="/JDBC/MemberSearch.jsp">관리자 정보 검색</a>
 <br>
 6. <a href="/JDBC/Login.jsp">로그인</a>
 &nbsp;&nbsp;

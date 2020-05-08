@@ -12,8 +12,8 @@
 <%EmpVO emp = (EmpVO) request.getAttribute("emp"); %>
 <h2>사원 정보 <%=request.getAttribute("message") %></h2>
 <form action="/JDBC/Emp.do" method=post>
-<%if(emp==null) { %>
 <input type=hidden name=action value="<%=request.getAttribute("action") %>"> <!-- action이 설정이 안되어있으면 post에서 구분을 못함!!! -->
+<%if(emp==null) { %>
 <table>
 <tr>
 <td>사원번호</td><td><input type=text name=empId></td>
