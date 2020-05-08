@@ -124,6 +124,8 @@ public class MemberDAO {
 		Connection con = null;
 		try {
 			con = getConnection();
+			//내가 만든 데이터베이스 member에는 트리거(history)가 걸려있지 않으므로
+			//history를 삭제하는 작업을 굳이 해줄 필요는 없음!!!
 			String sql = "update member set name=?, password=?, email=?, address=? where userid=?";
 			PreparedStatement stmt = con.prepareStatement(sql);
 			stmt.setString(1, mem.getName());
