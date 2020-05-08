@@ -7,7 +7,7 @@
 <title>로그인</title>
 </head>
 <body>
-<%=request.getAttribute("message")==null ? "" : request.getAttribute("message") %> <!-- null이면 출력x -->
+${message} <!-- EL표현식 : null값이면 자동으로 아무것도 출력하지 않음!!! -->
 <form action="/JDBC/Login.do" method=post>
 <%session = request.getSession(); %>
 <%if(session.getAttribute("userid")==null) { %>
